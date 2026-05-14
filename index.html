@@ -2,72 +2,75 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Permitimos el zoom manual para mejorar la lectura -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
     <title>THM Interactive Notes</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/github-markdown-css/5.2.0/github-markdown-dark.min.css">
-    <!-- Iconos y Fuentes -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         :root { --thm-red: #ef4444; --bg-dark: #0d1117; }
-        body { background-color: var(--bg-dark); font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background-color: var(--bg-dark); }
         
-        /* Estilo del Dashboard */
-        .sidebar { background: #161b22; width: 300px; transition: all 0.3s; }
-        .sidebar-btn { border-left: 3px solid transparent; transition: 0.2s; }
-        .sidebar-btn.active { background: #21262d; border-left-color: var(--thm-red); color: white; }
-
-        /* Contenido Interactivo */
-        .markdown-body { padding: 2rem; background: transparent !important; font-size: 1.1rem; }
-        
-        /* Botón de copiar código */
-        .code-container { position: relative; }
-        .copy-btn {
-            position: absolute; top: 5px; right: 5px;
-            background: #30363d; color: #8b949e;
-            padding: 4px 8px; border-radius: 6px; font-size: 12px;
-            cursor: pointer; opacity: 0; transition: 0.3s;
+        /* Sidebar ajustable para móvil */
+        .sidebar { 
+            position: fixed; top: 0; left: -100%; height: 100%; 
+            width: 280px; z-index: 50; transition: 0.3s;
+            background: #161b22; box-shadow: 10px 0 15px rgba(0,0,0,0.5);
         }
-        .code-container:hover .copy-btn { opacity: 1; }
+        .sidebar.open { left: 0; }
+
+        /* Capa oscura cuando el menú está abierto */
+        .overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 40; }
+        .overlay.active { display: block; }
+
+        .markdown-body { padding: 1.5rem; background: transparent !important; color: #d1d5db !important; }
+        pre { position: relative; padding: 1rem !important; }
         
-        /* Tablas y Alertas */
-        table { width: 100% !important; border-collapse: collapse; margin: 15px 0; }
-        th { background: #21262d !important; }
-        blockquote { border-left: 4px solid var(--thm-red) !important; background: #161b22; padding: 10px 20px; }
+        /* Botón de copiar mejorado para táctil */
+        .copy-btn {
+            position: absolute; top: 8px; right: 8px;
+            background: #30363d; padding: 6px 12px; border-radius: 6px;
+            font-size: 14px; color: #8b949e;
+        }
     </style>
 </head>
-<body class="flex h-screen overflow-hidden text-gray-300">
+<body class="text-gray-300">
 
-    <!-- Sidebar con buscador -->
-    <aside class="sidebar flex flex-col border-r border-gray-800">
-        <div class="p-6">
-            <div class="flex items-center gap-2 text-red-500 font-bold text-xl mb-4">
-                <i class="fas fa-shield-halved"></i> THM MASTER
-            </div>
-            <input type="text" id="search" placeholder="Buscar módulo..." 
-                   class="w-full bg-gray-800 border border-gray-700 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-red-500">
+    <div id="overlay" class="overlay"></div>
+
+    <!-- Sidebar -->
+    <aside id="sidebar" class="sidebar flex flex-col border-r border-gray-800">
+        <div class="p-6 flex justify-between items-center">
+            <span class="text-red-500 font-bold text-xl"><i class="fas fa-shield-halved"></i> THM</span>
+            <button id="close-menu" class="md:hidden text-2xl text-gray-500">&times;</button>
         </div>
-        <nav id="menu" class="flex-1 overflow-y-auto px-3 space-y-1 pb-10">
-            <!-- Botones de módulos -->
+        <div class="px-4 mb-4">
+            <input type="text" id="search" placeholder="Buscar..." class="w-full bg-gray-800 border border-gray-700 rounded-md px-3 py-2">
+        </div>
+        <nav id="menu" class="flex-1 overflow-y-auto px-3 space-y-1 pb-20">
+            <!-- Botones aquí -->
         </nav>
     </aside>
 
-    <!-- Main Content -->
-    <main class="flex-1 flex flex-col overflow-hidden bg-[#0d1117]">
-        <header class="h-14 border-b border-gray-800 flex items-center justify-between px-6 bg-[#161b22]">
-            <div id="breadcrumb" class="text-sm text-gray-400 font-mono">/ root / home / summaries</div>
-            <div id="reading-progress" class="h-1 bg-red-500 absolute bottom-0 left-0 transition-all duration-200" style="width: 0%"></div>
+    <!-- Contenido -->
+    <main class="flex flex-col min-h-screen bg-[#0d1117]">
+        <header class="h-16 border-b border-gray-800 flex items-center px-4 bg-[#161b22] sticky top-0 z-30">
+            <button id="open-menu" class="p-2 text-white bg-gray-800 rounded-md mr-4">
+                <i class="fas fa-bars"></i> Menú
+            </button>
+            <div id="breadcrumb" class="text-xs font-mono text-gray-500 truncate">/ home / thm-101</div>
+            <div id="reading-progress" class="h-1 bg-red-500 absolute bottom-0 left-0 transition-all" style="width: 0%"></div>
         </header>
 
         <div id="scroll-container" class="flex-1 overflow-y-auto">
-            <!-- Aquí se inyecta el contenido -->
-            <div id="content" class="markdown-body mx-auto max-w-5xl">
-                <div class="flex flex-col items-center justify-center h-full text-gray-600">
-                    <i class="fas fa-terminal text-6xl mb-4"></i>
-                    <p class="text-xl">Selecciona una herramienta o laboratorio para iniciar el repaso.</p>
+            <article id="content" class="markdown-body mx-auto max-w-4xl">
+                <div class="text-center py-20 text-gray-600">
+                    <i class="fas fa-hand-pointer text-5xl mb-4"></i>
+                    <p>Toca el botón "Menú" para elegir un tema.</p>
                 </div>
-            </div>
+            </article>
         </div>
     </main>
 
@@ -109,64 +112,61 @@
             { name: "Netcat vs Nmap", path: "THM-101/netcat_vs_nmap.md" }
         ];
 
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('overlay');
         const menu = document.getElementById('menu');
         const content = document.getElementById('content');
         const scrollContainer = document.getElementById('scroll-container');
 
-        // Renderizar Menú
+        // Controles del Menú
+        const toggleMenu = () => {
+            sidebar.classList.toggle('open');
+            overlay.classList.toggle('active');
+        };
+
+        document.getElementById('open-menu').onclick = toggleMenu;
+        document.getElementById('close-menu').onclick = toggleMenu;
+        overlay.onclick = toggleMenu;
+
         function renderMenu(filter = "") {
             menu.innerHTML = "";
             modules.filter(m => m.name.toLowerCase().includes(filter.toLowerCase())).forEach(mod => {
                 const b = document.createElement('button');
-                b.className = "sidebar-btn w-full text-left px-4 py-2 rounded-md text-sm hover:text-white flex items-center gap-3";
-                b.innerHTML = `<i class="far fa-file-code opacity-40"></i> ${mod.name}`;
+                b.className = "w-full text-left px-4 py-3 rounded-md text-sm bg-gray-800/30 hover:bg-gray-700 transition flex items-center gap-2";
+                b.innerHTML = `<i class="far fa-file-alt text-red-500"></i> ${mod.name}`;
                 b.onclick = () => {
-                    document.querySelectorAll('.sidebar-btn').forEach(x => x.classList.remove('active'));
-                    b.classList.add('active');
                     loadMarkdown(mod.path);
+                    if(window.innerWidth < 1024) toggleMenu();
                 };
                 menu.appendChild(b);
             });
         }
 
         async function loadMarkdown(path) {
-            content.innerHTML = "<div class='text-center mt-20'><i class='fas fa-circle-notch animate-spin text-3xl'></i></div>";
+            content.innerHTML = "<p class='animate-pulse'>Cargando...</p>";
             try {
                 const res = await fetch(path);
                 const text = await res.text();
+                content.innerHTML = marked.parse(text);
                 
-                // Convertir MD a HTML
-                let htmlContent = marked.parse(text);
-                content.innerHTML = htmlContent;
-
-                // POST-PROCESAMIENTO INTERACTIVO
-                // 1. Añadir botones de copiar a los bloques de código
+                // Botones de copiar para móvil
                 content.querySelectorAll('pre').forEach(pre => {
-                    const container = document.createElement('div');
-                    container.className = 'code-container';
-                    pre.parentNode.insertBefore(container, pre);
-                    container.appendChild(pre);
-                    
                     const btn = document.createElement('button');
                     btn.className = 'copy-btn';
-                    btn.innerHTML = '<i class="far fa-copy"></i> Copy';
+                    btn.innerHTML = 'Copy';
                     btn.onclick = () => {
                         navigator.clipboard.writeText(pre.innerText);
-                        btn.innerHTML = '<i class="fas fa-check"></i> Copied!';
-                        setTimeout(() => btn.innerHTML = '<i class="far fa-copy"></i> Copy', 2000);
+                        btn.innerText = '¡Listo!';
+                        setTimeout(() => btn.innerText = 'Copy', 2000);
                     };
-                    container.appendChild(btn);
+                    pre.appendChild(btn);
                 });
-
-            } catch (e) {
-                content.innerHTML = "Error cargando el archivo. Revisa el nombre en el repositorio.";
-            }
+                scrollContainer.scrollTo(0,0);
+            } catch (e) { content.innerHTML = "Error al cargar."; }
         }
 
-        // Buscador
         document.getElementById('search').oninput = (e) => renderMenu(e.target.value);
-
-        // Barra de progreso
+        
         scrollContainer.onscroll = () => {
             const winScroll = scrollContainer.scrollTop;
             const height = scrollContainer.scrollHeight - scrollContainer.clientHeight;
