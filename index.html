@@ -3,122 +3,149 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>THM Study Dashboard | Jose Sing</title>
+    <title>THM Interactive Notes</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/github-markdown-css/5.2.0/github-markdown-dark.min.css">
+    <!-- Iconos y Fuentes -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        body { background-color: #0a0a0a; }
-        .sidebar-item:hover { background-color: #1f2937; border-left: 4px solid #ef4444; }
-        .markdown-body { background-color: transparent !important; color: #d1d5db !important; }
-        .markdown-body code { background-color: #2d3748 !important; color: #f87171 !important; padding: 2px 4px; border-radius: 4px; }
-        ::-webkit-scrollbar { width: 8px; }
-        ::-webkit-scrollbar-thumb { background: #374151; border-radius: 10px; }
+        :root { --thm-red: #ef4444; --bg-dark: #0d1117; }
+        body { background-color: var(--bg-dark); font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        
+        /* Estilo del Dashboard */
+        .sidebar { background: #161b22; width: 300px; transition: all 0.3s; }
+        .sidebar-btn { border-left: 3px solid transparent; transition: 0.2s; }
+        .sidebar-btn.active { background: #21262d; border-left-color: var(--thm-red); color: white; }
+
+        /* Contenido Interactivo */
+        .markdown-body { padding: 2rem; background: transparent !important; font-size: 1.1rem; }
+        
+        /* Botón de copiar código */
+        .code-container { position: relative; }
+        .copy-btn {
+            position: absolute; top: 5px; right: 5px;
+            background: #30363d; color: #8b949e;
+            padding: 4px 8px; border-radius: 6px; font-size: 12px;
+            cursor: pointer; opacity: 0; transition: 0.3s;
+        }
+        .code-container:hover .copy-btn { opacity: 1; }
+        
+        /* Tablas y Alertas */
+        table { width: 100% !important; border-collapse: collapse; margin: 15px 0; }
+        th { background: #21262d !important; }
+        blockquote { border-left: 4px solid var(--thm-red) !important; background: #161b22; padding: 10px 20px; }
     </style>
 </head>
-<body class="flex h-screen overflow-hidden text-gray-200">
+<body class="flex h-screen overflow-hidden text-gray-300">
 
-    <!-- Sidebar Lateral -->
-    <aside class="w-80 bg-gray-900 border-r border-gray-800 flex flex-col hidden md:flex">
-        <div class="p-6 border-b border-gray-800">
-            <h1 class="text-2xl font-bold text-red-500 tracking-tighter">THM <span class="text-white">NOTES</span></h1>
-            <p class="text-xs text-gray-500 mt-1 uppercase tracking-widest">Cybersecurity Learning</p>
+    <!-- Sidebar con buscador -->
+    <aside class="sidebar flex flex-col border-r border-gray-800">
+        <div class="p-6">
+            <div class="flex items-center gap-2 text-red-500 font-bold text-xl mb-4">
+                <i class="fas fa-shield-halved"></i> THM MASTER
+            </div>
+            <input type="text" id="search" placeholder="Buscar módulo..." 
+                   class="w-full bg-gray-800 border border-gray-700 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-red-500">
         </div>
-        <nav id="menu" class="flex-1 overflow-y-auto p-4 space-y-1">
-            <!-- Botones generados dinámicamente -->
+        <nav id="menu" class="flex-1 overflow-y-auto px-3 space-y-1 pb-10">
+            <!-- Botones de módulos -->
         </nav>
     </aside>
 
-    <!-- Contenedor Principal -->
-    <main class="flex-1 flex flex-col bg-black relative">
-        <!-- Header -->
-        <header class="h-16 border-b border-gray-800 flex items-center justify-between px-6 bg-gray-900/50 backdrop-blur-md">
-            <button id="mobile-btn" class="md:hidden text-white text-2xl">☰</button>
-            <h2 id="current-title" class="font-medium text-gray-400 italic">Selecciona un módulo para comenzar</h2>
-            <div class="flex items-center space-x-2">
-                <span class="h-2 w-2 rounded-full bg-green-500 animate-pulse"></span>
-                <span class="text-xs font-mono text-green-500">READY_TO_STUDY</span>
-            </div>
+    <!-- Main Content -->
+    <main class="flex-1 flex flex-col overflow-hidden bg-[#0d1117]">
+        <header class="h-14 border-b border-gray-800 flex items-center justify-between px-6 bg-[#161b22]">
+            <div id="breadcrumb" class="text-sm text-gray-400 font-mono">/ root / home / summaries</div>
+            <div id="reading-progress" class="h-1 bg-red-500 absolute bottom-0 left-0 transition-all duration-200" style="width: 0%"></div>
         </header>
 
-        <!-- Area de Lectura -->
-        <div id="content-area" class="flex-1 overflow-y-auto p-4 md:p-12">
-            <article id="output" class="markdown-body max-w-4xl mx-auto text-lg leading-relaxed">
-                <!-- Aquí se "dibuja" el Markdown convertido a HTML elegante -->
-                <div class="text-center py-20">
-                    <h3 class="text-4xl font-bold text-gray-800">BIENVENIDO</h3>
-                    <p class="text-gray-600 mt-4 text-xl">Tus summaries de THM listos para el repaso.</p>
+        <div id="scroll-container" class="flex-1 overflow-y-auto">
+            <!-- Aquí se inyecta el contenido -->
+            <div id="content" class="markdown-body mx-auto max-w-5xl">
+                <div class="flex flex-col items-center justify-center h-full text-gray-600">
+                    <i class="fas fa-terminal text-6xl mb-4"></i>
+                    <p class="text-xl">Selecciona una herramienta o laboratorio para iniciar el repaso.</p>
                 </div>
-            </article>
+            </div>
         </div>
     </main>
 
     <script>
-        // TU LISTA DE ARCHIVOS
         const modules = [
             { name: "API REST Notes", path: "THM-101/API REST notes.md" },
-            { name: "Blue Lab", path: "THM-101/Blue-lab.md" },
-            { name: "Burp Suite", path: "THM-101/Burp_Suite_Study_Summary.md" },
             { name: "CAPA Analysis", path: "THM-101/CAPA_Study_Summary.md" },
-            { name: "CyberChef", path: "THM-101/CyberChef_Study_Summary.md" },
-            { name: "Firewall Fundamentals", path: "THM-101/Firewall_Fundamentals_Study_Summary.md" },
-            { name: "FlareVM", path: "THM-101/FlareVM_Study_Summary.md" },
-            { name: "Forensics Fundamentals", path: "THM-101/Forensics_Fundamentals_Study_Summary.md" },
-            { name: "Gobuster", path: "THM-101/Gobuster_Study_Summary.md" },
-            { name: "Hashing Basics", path: "THM-101/Hashing Basics.md" },
-            { name: "Hydra", path: "THM-101/Hydra_Study_Summary.md" },
-            { name: "IDS Fundamentals", path: "THM-101/IDS_Fundamentals_Study_Summary.md" },
-            { name: "Incident Response", path: "THM-101/Incident_Response_Fundamentals_Study_Summary.md" },
-            { name: "JS Essentials", path: "THM-101/JS_Essentials_Study_Summary.md" },
-            { name: "Logs Fundamentals", path: "THM-101/Logs_Fundamentals_Study_Summary.md" },
-            { name: "MITRE ATT&CK", path: "THM-101/MITRE_ATT&CK_Study_Summary.md" },
             { name: "Metasploit", path: "THM-101/Metasploit.md" },
-            { name: "Moniker Link", path: "THM-101/Moniker link.md" },
-            { name: "OWASP Design Flaws", path: "THM-101/OWASP_Application_Design_Flaws_Summary.md" },
-            { name: "OWASP IAAA Failures", path: "THM-101/OWASP_IAAA_Failures_Summary.md" },
-            { name: "OWASP Insecure Data", path: "THM-101/OWASP_Insecure_Data_Handling.md" },
-            { name: "REMnux", path: "THM-101/REMnux_Study_Summary.md" },
-            { name: "SIEM Summary", path: "THM-101/SIEM_Study_Summary.md" },
-            { name: "SOC Basics", path: "THM-101/SOC_Basics_Study_Summary.md" },
-            { name: "SQLMap", path: "THM-101/SQLMap_Study_Summary.md" },
-            { name: "SQL Fundamentals", path: "THM-101/SQL_Fundamentals_Study_Summary.md" },
-            { name: "Search Skills", path: "THM-101/Search_Skills_Study_Summary.md" },
-            { name: "Security Principles", path: "THM-101/Security_Principles_Study_Summary.md" },
-            { name: "Shell Overview", path: "THM-101/Shell_Overview_Study_Summary.md" },
-            { name: "Vulnerability Scanner", path: "THM-101/Vulnerability_Scanner_Overview_Study_Summary.md" },
-            { name: "Web App Basics", path: "THM-101/Web_Application_Basics.md" },
-            { name: "Dirb Attack URLs", path: "THM-101/dirb-atackURLS.md" },
-            { name: "John the Ripper", path: "THM-101/john the Ripper.md" },
             { name: "Netcat vs Nmap", path: "THM-101/netcat_vs_nmap.md" }
+            // Agrega aquí el resto de tu lista que ya tienes...
         ];
 
         const menu = document.getElementById('menu');
-        const output = document.getElementById('output');
-        const currentTitle = document.getElementById('current-title');
+        const content = document.getElementById('content');
+        const scrollContainer = document.getElementById('scroll-container');
 
-        // Generar Menu
-        modules.forEach(mod => {
-            const btn = document.createElement('button');
-            btn.className = "sidebar-item w-full text-left px-4 py-3 text-sm text-gray-400 transition-all rounded-lg duration-200 border-l-4 border-transparent";
-            btn.innerHTML = `<span class="opacity-50 mr-2">#</span> ${mod.name}`;
-            btn.onclick = () => loadDoc(mod.path, mod.name);
-            menu.appendChild(btn);
-        });
+        // Renderizar Menú
+        function renderMenu(filter = "") {
+            menu.innerHTML = "";
+            modules.filter(m => m.name.toLowerCase().includes(filter.toLowerCase())).forEach(mod => {
+                const b = document.createElement('button');
+                b.className = "sidebar-btn w-full text-left px-4 py-2 rounded-md text-sm hover:text-white flex items-center gap-3";
+                b.innerHTML = `<i class="far fa-file-code opacity-40"></i> ${mod.name}`;
+                b.onclick = () => {
+                    document.querySelectorAll('.sidebar-btn').forEach(x => x.classList.remove('active'));
+                    b.classList.add('active');
+                    loadMarkdown(mod.path);
+                };
+                menu.appendChild(b);
+            });
+        }
 
-        async function loadDoc(path, name) {
-            currentTitle.innerText = `Mostrando: ${name}`;
-            output.innerHTML = "<p class='text-gray-500 animate-pulse'>Cargando contenido técnico...</p>";
-            
+        async function loadMarkdown(path) {
+            content.innerHTML = "<div class='text-center mt-20'><i class='fas fa-circle-notch animate-spin text-3xl'></i></div>";
             try {
-                const response = await fetch(path);
-                const mdText = await response.text();
-                // LA MAGIA: Convertimos el texto MD en HTML Visual
-                output.innerHTML = marked.parse(mdText);
-                document.getElementById('content-area').scrollTo(0,0);
-            } catch (err) {
-                output.innerHTML = `<div class='bg-red-900/20 p-4 border border-red-500 text-red-500'>Error al conectar con el archivo: ${path}. Asegúrate de que el nombre coincida exactamente.</div>`;
+                const res = await fetch(path);
+                const text = await res.text();
+                
+                // Convertir MD a HTML
+                let htmlContent = marked.parse(text);
+                content.innerHTML = htmlContent;
+
+                // POST-PROCESAMIENTO INTERACTIVO
+                // 1. Añadir botones de copiar a los bloques de código
+                content.querySelectorAll('pre').forEach(pre => {
+                    const container = document.createElement('div');
+                    container.className = 'code-container';
+                    pre.parentNode.insertBefore(container, pre);
+                    container.appendChild(pre);
+                    
+                    const btn = document.createElement('button');
+                    btn.className = 'copy-btn';
+                    btn.innerHTML = '<i class="far fa-copy"></i> Copy';
+                    btn.onclick = () => {
+                        navigator.clipboard.writeText(pre.innerText);
+                        btn.innerHTML = '<i class="fas fa-check"></i> Copied!';
+                        setTimeout(() => btn.innerHTML = '<i class="far fa-copy"></i> Copy', 2000);
+                    };
+                    container.appendChild(btn);
+                });
+
+            } catch (e) {
+                content.innerHTML = "Error cargando el archivo. Revisa el nombre en el repositorio.";
             }
         }
+
+        // Buscador
+        document.getElementById('search').oninput = (e) => renderMenu(e.target.value);
+
+        // Barra de progreso
+        scrollContainer.onscroll = () => {
+            const winScroll = scrollContainer.scrollTop;
+            const height = scrollContainer.scrollHeight - scrollContainer.clientHeight;
+            const scrolled = (winScroll / height) * 100;
+            document.getElementById("reading-progress").style.width = scrolled + "%";
+        };
+
+        renderMenu();
     </script>
 </body>
 </html>
