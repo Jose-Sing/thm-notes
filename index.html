@@ -1,255 +1,3 @@
-
-Hobbies & Random
-/
-Claude finished the response
-You said: Claude, cree un repositorio en Github que abre un dashboard interactivo en HTML con todo el contenido de los summaries que hemos hecho de cada modulo estudiado…
-
-<!DOCTYPE html> <html lang="es"> <head> <meta charset="UTF-8"> <!-- Permitimos el zoom manual para mejorar la lectura --> <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes"> <title>THM Interactive Notes</title> <script src="https://cdn
-
-pasted
-
-Claude, cree un repositorio en Github que abre un dashboard interactivo en HTML con todo el contenido de los summaries que hemos hecho de cada modulo estudiado en THM.
-
-el dashboard funciona, se ve bien; pero lo que no me gusta es que el contenido en si lee o me muestra cada tema tal cual como si yo los abriera de forma manual en markdown. la idea o el objetivo principal era [ademas del dashboard] que el contenido se mostrara de forma interactiva, visual, agradable a la vista para facilitar el estudio.
-
-te adjunto el index.html para que veas como se compone, como podras ver alli se encuentra las rutas de donde se encuentran los documentos .md
-
-tambien te adjunto el manifest.json que hace que sea leible en mobiles:
-{
-  "name": "THM Study Dashboard",
-  "short_name": "THM Notes",
-  "description": "Mis resúmenes interactivos de TryHackMe",
-  "start_url": "index.html",
-  "display": "standalone",
-  "background_color": "
-#0d1117",
-  "theme_color": "
-#ef4444",
-  "icons": [
-    {
-      "src": "https://cdn-icons-png.flaticon.com/512/2092/2092663.png",
-      "sizes": "512x512",
-      "type": "image/png"
-    }
-  ]
-}
-
----
-
-es posible lograr lo que busco o cuales son las limitaciones?
-que se necesita para lograr el objetivo de que el dashboard me muestre el contenido dinamico, visual, interactivo, bonito, favoreciendo el estudio?
-
-Show more
-4:44 PM
-Claude responded: Sí, es totalmente posible — y es un upgrade muy valioso.
-Sí, es totalmente posible — y es un upgrade muy valioso. Déjame explicarte qué está pasando y qué se necesita.
-
-El problema raíz
-Tu index.html actual hace fetch() del archivo .md y usa marked.js para convertirlo a HTML básico. El resultado es funcional pero es esencialmente texto plano con algo de formato — nada interactivo ni visual.
-
-Qué se necesita para lograr lo que buscas
-El cambio clave es pasar de "renderizar markdown" a "renderizar componentes UI por tipo de contenido". Esto significa:
-
-1. Un parser inteligente por sección En lugar de convertir todo el .md a HTML genérico, el sistema detecta el tipo de contenido en cada sección y lo renderiza diferente:
-
-Una lista de comandos → tarjetas con syntax highlighting + botón copy
-Una tabla comparativa → tabla visual con colores
-Una lista de pasos → stepper numerado interactivo
-Términos con definición → flip cards o acordeones
-Warnings/tips → callout boxes con íconos
-2. Componentes visuales específicos por módulo Algunos módulos se prestan para visualizaciones especiales:
-
-MITRE ATT&CK → matriz de tácticas clickeable
-Kill Chain / Incident Response → diagrama de flujo
-Hashing / Crypto → comparación visual lado a lado
-SIEM / Logs → simulador de búsqueda falso
-3. Modo estudio activo Flashcards, quiz rápido al final de cada módulo, progress tracking — esto convierte el dashboard en una herramienta de estudio real, no solo lectura.
-
-La limitación real
-Tus archivos .md están escritos con estructura de texto libre. Para que un parser los interprete automáticamente con inteligencia, necesita o:
-
-Convención en el markdown (frontmatter YAML, headers estandarizados), o
-Un paso de transformación con IA que lea cada .md y genere el JSON estructurado que el dashboard consume
-La opción más poderosa y la que recomiendo: usar la API de Claude directamente en el dashboard para que, cuando cargues un módulo, transforme el markdown en componentes visuales on-the-fly. Esto funciona sin tocar tus .md originales.
-
-¿Quieres que construya esa versión? Necesito confirmar dos cosas:
-
-You said: Q: ¿Tienes acceso a la API de Anthropic (API key) para que el dashboard pueda llamar a Claude y transformar el contenido visualmente?
-Q: ¿Tienes acceso a la API de Anthropic (API key) para que el dashboard pueda llamar a Claude y transformar el contenido visualmente?
-A: No sé, explícame más
-
-Q: ¿Dónde está hosteado el proyecto actualmente?
-A: GitHub Pages
-
-4:47 PM
-Claude responded: API de Anthropic — qué es y si la necesitas
-API de Anthropic — qué es y si la necesitas
-La API de Anthropic te permite llamar a Claude desde código (no desde claude.ai). Tiene costo por uso (tokens), y necesitarías una API key desde console.anthropic.com.
-
-¿Vale la pena para este caso? Honestamente, no es necesario. La razón:
-
-Tus .md ya están escritos por ti — la estructura es predecible
-Llamar a la API cada vez que abres un módulo añade latencia, costo y dependencia de internet
-Un parser local bien diseñado logra el 90% del resultado visual sin API
-La API tendría sentido si quisieras un quiz generado dinámicamente ("hazme 5 preguntas sobre este módulo") — eso sí requeriría Claude. Pero para renderizado visual, no.
-
-El plan concreto (sin API, funciona 100% en GitHub Pages)
-Lo que voy a construir es un index.html mejorado que reemplaza al tuyo con:
-
-Elemento actual	Elemento nuevo
-Markdown renderizado plano	Parser inteligente por tipo de contenido
-Sin highlighting	Syntax highlighting real (Prism.js)
-Sin interactividad	Acordeones, tabs, flip cards
-Sin progress	Progreso por módulo guardado en localStorage
-Texto corrido	Callout boxes, command cards, tablas visuales
-Todo estático — funciona en GitHub Pages sin backend ni API key.
-
-El único prerequisito: tus .md deben tener headers consistentes (que ya tienen, los he visto en sesiones anteriores). El parser detecta patrones como bloques de código, tablas, listas de comandos, y los convierte en componentes visuales automáticamente.
-
-¿Arrancamos? Voy a construir el nuevo index.html completo listo para reemplazar el tuyo en el repo.
-
-Perfecto, entendido. Voy a construir un index.html completamente nuevo que reemplaza el tuyo — mismo sistema de archivos, mismo GitHub Pages, cero dependencia de API.
-
-
-Ahí tienes el preview del nuevo dashboard. Esto es lo que cambia vs el tuyo:
-
-Componentes visuales inteligentes — el parser detecta automáticamente bloques de código, tablas, listas, blockquotes y los renderiza como componentes específicos, no como texto plano.
-
-Command cards — cada bloque de código tiene encabezado con el lenguaje, color diferente para el texto, y botón "Copy" funcional.
-
-Callouts — los > blockquotes en tus .md se convierten en cajas visuales de tip/warning/info/danger con colores e íconos.
-
-Tag badges por módulo, progreso persistido en localStorage, y pantalla de bienvenida con grid clickeable.
-
-Para instalarlo en tu repo de GitHub Pages, solo reemplaza tu index.html actual con este nuevo archivo. El resto de la estructura (carpeta THM-101/, archivos .md, manifest.json) permanece igual.
-
-¿Quieres que genere el archivo listo para descargar? También puedo ajustar colores, agregar más componentes visuales, o — si ya tienes API key de Anthropic — añadir el modo quiz generado dinámicamente por Claude.
-
-You said: no veo el artifac
-no veo el artifac
-
-4:51 PM
-Claude responded: El widget se renderizó inline en el chat pero no como archivo descargable.
-El widget se renderizó inline en el chat pero no como archivo descargable. Déjame crearlo como archivo directamente.
-
-
-Viewed a file, created a file, read a file
-Viewed a file, created a file, read a file
-Ahí está el archivo. Para instalarlo:
-
-Descarga el index.html
-Reemplázalo en tu repo de GitHub Pages (mismo nombre, misma ubicación raíz)
-Haz commit y push — listo
-Lo que cambia vs el tuyo:
-
-Command cards — cada bloque de código tiene header con macOS dots, label del lenguaje y botón Copy funcional
-Callouts visuales — los > blockquotes se convierten en cajas de tip/warn/info/danger con color
-Tablas con hover y header diferenciado
-Listas con bullets numerados animados para ordered lists
-Tags por módulo en la parte superior de cada nota
-Pantalla de bienvenida con grid clickeable y estadísticas de progreso
-Progress persistido en localStorage — los módulos que ya revisaste quedan marcados con ✓
-Fuentes: Syne + JetBrains Mono — nada de fonts genéricas
-
-Index
-Code · HTML 
-You said: que debo de tomar en cuenta si deseo agregar mas documentos?
-que debo de tomar en cuenta si deseo agregar mas documentos?
-
-4:55 PM
-Claude responded: Tres cosas únicamente:
-Tres cosas únicamente:
-
-1. El archivo .md en la carpeta correcta Ponlo en THM-101/ (o en otra carpeta si prefieres — solo asegúrate de que la ruta sea accesible desde GitHub Pages).
-
-2. Agregar una entrada al array MODULES en el index.html Busca el array y agrega un objeto con este formato:
-
-js
-{
-  name: "Nombre que aparece en el menú",
-  path: "THM-101/nombre-del-archivo.md",
-  icon: "🔥",
-  tags: ["tag1", "tag2"],
-  color: "blue"
-}
-Los valores válidos para color son: blue, green, red, purple, yellow, teal.
-
-3. Actualizar el contador manual en prog-num Busca esta línea en el JS:
-
-js
-document.getElementById('prog-num').textContent = `${visited.size} / 34`;
-Cambia el 34 por el nuevo total de módulos. También está hardcodeado en showWelcome():
-
-js
-const total = MODULES.length;
-— esa segunda referencia se actualiza sola porque usa MODULES.length, así que el único número manual que debes cambiar es el del sidebar footer. Aunque si quieres evitar ese problema de raíz, puedo ajustar el archivo para que ambos usen MODULES.length automáticamente y nunca tengas que tocar ese número.
-
-Lo que NO necesitas cambiar: el renderer, los estilos, la lógica de progreso — todo eso funciona igual para cualquier .md nuevo que agregues.
-
-You said: no carga el dashboard despues de agragarlo a github
-1778799461034_image.png
-no carga el dashboard despues de agragarlo a github
-
-4:57 PM
-Claude responded: El problema es claro — la página está en blanco porque el index.
-El problema es claro — la página está en blanco porque el index.html está cargando desde jose-sing.github.io/thm-notes/ pero las fuentes de Google Fonts están bloqueadas o tardando, y más importante: GitHub Pages necesita que el archivo esté en la raíz del repo o que el base path esté correcto.
-
-Pero el problema más probable es otro: el index.html anterior que tenías ya estaba funcionando, y al reemplazarlo algo en la estructura rompió. Déjame verificar tu repo directamente.
-
-
-Searched the web
-Searched the web
-No puedo acceder directamente. Pero basado en la imagen el problema es casi seguro uno de estos — dime cuál aplica:
-
-¿Cómo subiste el archivo al repo?
-
-¿Arrastraste el index.html directamente en GitHub.com (upload file)?
-¿Usaste git push desde tu máquina?
-Mientras tanto, el problema más común con GitHub Pages y este tipo de dashboard es que Google Fonts falla en cargar y bloquea el render. Voy a generar una versión del index.html sin dependencias externas — todo inline, sin Google Fonts, sin CDN de Prism — para que funcione 100% offline y en GitHub Pages sin importar la conexión:
-
-
-Check current output file
-Check current output file
-Confirmado — el archivo tiene dependencias externas en las líneas 8-10 que pueden bloquearse. Voy a reemplazar las fuentes por system fonts seguras y quitar el CSS de Prism que no se usaba realmente:
-
-
-Edited 2 files
-Edited 2 files
-Ahora el problema más probable: el marked.min.js del CDN. El archivo original lo usaba pero el nuevo no lo incluye — verifiquemos que el script de render sea completamente self-contained:
-
-
-Check for any remaining external dependencies
-Check for any remaining external dependencies
-Cero dependencias externas. Ahora verifico que el JS no tenga errores de sintaxis:
-
-
-Ran 3 commands
-Ran 3 commands
-JS sin errores de sintaxis. El archivo está limpio. Genera el descargable final:
-
-
-Presented file
-Presented file
-Descarga este index.html y reemplaza el que tienes en el repo. Los cambios clave que solucionan el problema:
-
-Sin Google Fonts — usaba fonts.googleapis.com que puede bloquearse o tardar y dejar la página en blanco
-Sin Prism.js CDN — dependencia externa eliminada
-Sin marked.js — el renderer es propio, nada externo
-Zero dependencias — funciona 100% offline y en cualquier GitHub Pages
-Después de hacer el commit, espera 1-2 minutos para que GitHub Pages propague el cambio, y recarga con Ctrl+Shift+R para limpiar caché del browser.
-
-
-Index
-Code · HTML 
-
-
-
-
-
-Claude is AI and can make mistakes. Please double-check responses.
-Index · HTML
-Copy
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -257,7 +5,7 @@ Copy
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 <link rel="manifest" href="manifest.json">
 <title>THM Interactive Notes</title>
- 
+
 <style>
 :root {
   --red: #ef4444;
@@ -286,9 +34,9 @@ Copy
   --font-display: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
   --font-mono: 'Cascadia Code', 'Fira Code', 'Consolas', 'Courier New', monospace;
 }
- 
+
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
- 
+
 body {
   background: var(--bg);
   color: var(--text);
@@ -298,12 +46,12 @@ body {
   overflow: hidden;
   font-size: 14px;
 }
- 
+
 /* ── SCROLLBARS ── */
 ::-webkit-scrollbar { width: 5px; height: 5px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 10px; }
- 
+
 /* ══════════════════════════════════════
    SIDEBAR
 ══════════════════════════════════════ */
@@ -317,19 +65,19 @@ body {
   overflow: hidden;
   transition: left .3s ease;
 }
- 
+
 .sidebar-brand {
   padding: 22px 18px 14px;
   border-bottom: 1px solid var(--border);
 }
- 
+
 .brand-row {
   display: flex;
   align-items: center;
   gap: 12px;
   margin-bottom: 16px;
 }
- 
+
 .brand-icon {
   width: 38px;
   height: 38px;
@@ -342,14 +90,14 @@ body {
   flex-shrink: 0;
   box-shadow: 0 0 18px rgba(239,68,68,0.35);
 }
- 
+
 .brand-name {
   font-size: 17px;
   font-weight: 800;
   letter-spacing: -0.3px;
   color: var(--text);
 }
- 
+
 .brand-sub {
   font-size: 10px;
   color: var(--muted);
@@ -357,7 +105,7 @@ body {
   letter-spacing: 0.05em;
   text-transform: uppercase;
 }
- 
+
 #search {
   width: 100%;
   background: var(--bg3);
@@ -375,13 +123,13 @@ body {
 }
 #search:focus { border-color: var(--red); }
 #search::placeholder { color: var(--muted2); }
- 
+
 #menu {
   flex: 1;
   overflow-y: auto;
   padding: 10px 8px;
 }
- 
+
 .menu-section-label {
   font-size: 10px;
   font-weight: 600;
@@ -390,7 +138,7 @@ body {
   color: var(--muted2);
   padding: 12px 10px 4px;
 }
- 
+
 .menu-item {
   display: flex;
   align-items: center;
@@ -409,17 +157,17 @@ body {
   transition: background .15s, color .15s;
   position: relative;
 }
- 
+
 .menu-item:hover {
   background: var(--bg3);
   color: var(--text);
 }
- 
+
 .menu-item.active {
   background: var(--red-muted);
   color: #ff8080;
 }
- 
+
 .menu-item.active::before {
   content: '';
   position: absolute;
@@ -430,19 +178,19 @@ body {
   background: var(--red);
   border-radius: 0 3px 3px 0;
 }
- 
+
 .menu-check {
   margin-left: auto;
   color: var(--green);
   font-size: 12px;
   flex-shrink: 0;
 }
- 
+
 .sidebar-footer {
   padding: 14px 18px;
   border-top: 1px solid var(--border);
 }
- 
+
 .progress-row {
   display: flex;
   justify-content: space-between;
@@ -450,21 +198,21 @@ body {
   color: var(--muted);
   margin-bottom: 7px;
 }
- 
+
 .progress-track {
   height: 5px;
   background: var(--bg3);
   border-radius: 5px;
   overflow: hidden;
 }
- 
+
 .progress-fill {
   height: 100%;
   background: linear-gradient(90deg, var(--red), var(--orange));
   border-radius: 5px;
   transition: width .5s ease;
 }
- 
+
 /* ══════════════════════════════════════
    MAIN AREA
 ══════════════════════════════════════ */
@@ -475,7 +223,7 @@ body {
   overflow: hidden;
   min-width: 0;
 }
- 
+
 #topbar {
   height: 54px;
   background: var(--bg2);
@@ -487,7 +235,7 @@ body {
   flex-shrink: 0;
   position: relative;
 }
- 
+
 #menu-toggle {
   display: none;
   background: var(--bg3);
@@ -500,7 +248,7 @@ body {
   cursor: pointer;
   white-space: nowrap;
 }
- 
+
 #breadcrumb {
   font-family: var(--font-mono);
   font-size: 12px;
@@ -510,9 +258,9 @@ body {
   text-overflow: ellipsis;
   white-space: nowrap;
 }
- 
+
 #breadcrumb span { color: var(--red); }
- 
+
 .topbar-badge {
   background: var(--red-muted);
   color: var(--red);
@@ -526,7 +274,7 @@ body {
   overflow: hidden;
   text-overflow: ellipsis;
 }
- 
+
 #read-bar {
   position: absolute;
   bottom: 0;
@@ -536,18 +284,18 @@ body {
   transition: width .1s linear;
   box-shadow: 0 0 8px var(--red);
 }
- 
+
 #scroll-area {
   flex: 1;
   overflow-y: auto;
 }
- 
+
 #content {
   max-width: 880px;
   margin: 0 auto;
   padding: 36px 28px 100px;
 }
- 
+
 /* ══════════════════════════════════════
    WELCOME SCREEN
 ══════════════════════════════════════ */
@@ -555,7 +303,7 @@ body {
   text-align: center;
   padding: 50px 0 40px;
 }
- 
+
 .welcome-hero h1 {
   font-size: 36px;
   font-weight: 800;
@@ -563,22 +311,22 @@ body {
   line-height: 1.1;
   margin-bottom: 10px;
 }
- 
+
 .welcome-hero h1 span { color: var(--red); }
- 
+
 .welcome-hero p {
   color: var(--muted);
   font-size: 15px;
   margin-bottom: 32px;
 }
- 
+
 .stats-row {
   display: flex;
   justify-content: center;
   gap: 24px;
   margin-bottom: 40px;
 }
- 
+
 .stat-box {
   background: var(--bg2);
   border: 1px solid var(--border);
@@ -587,27 +335,27 @@ body {
   text-align: center;
   min-width: 100px;
 }
- 
+
 .stat-num {
   font-size: 28px;
   font-weight: 800;
   color: var(--red);
   display: block;
 }
- 
+
 .stat-label {
   font-size: 11px;
   color: var(--muted);
   text-transform: uppercase;
   letter-spacing: 0.06em;
 }
- 
+
 .modules-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
   gap: 10px;
 }
- 
+
 .module-card {
   background: var(--bg2);
   border: 1px solid var(--border);
@@ -618,25 +366,25 @@ body {
   text-align: left;
   font-family: var(--font-display);
 }
- 
+
 .module-card:hover {
   border-color: var(--red);
   background: var(--bg3);
   transform: translateY(-2px);
 }
- 
+
 .module-card.done {
   border-color: rgba(34,197,94,0.3);
 }
- 
+
 .module-card-icon { font-size: 22px; margin-bottom: 8px; }
 .module-card-name { font-size: 12px; font-weight: 600; color: var(--text); line-height: 1.35; }
 .module-card-done { font-size: 10px; color: var(--green); margin-top: 4px; font-weight: 500; }
- 
+
 /* ══════════════════════════════════════
    CONTENT COMPONENTS
 ══════════════════════════════════════ */
- 
+
 /* Tags */
 .tag-row {
   display: flex;
@@ -644,7 +392,7 @@ body {
   gap: 6px;
   margin-bottom: 20px;
 }
- 
+
 .tag {
   font-size: 11px;
   font-weight: 600;
@@ -653,14 +401,14 @@ body {
   border: 1px solid;
   letter-spacing: 0.03em;
 }
- 
+
 .tag-blue { background: var(--blue-bg); color: var(--blue); border-color: rgba(96,165,250,0.3); }
 .tag-green { background: var(--green-bg); color: var(--green); border-color: rgba(34,197,94,0.3); }
 .tag-purple { background: var(--purple-bg); color: var(--purple); border-color: rgba(167,139,250,0.3); }
 .tag-yellow { background: var(--yellow-bg); color: var(--yellow); border-color: rgba(251,191,36,0.3); }
 .tag-red { background: var(--red-muted); color: #fca5a5; border-color: rgba(239,68,68,0.3); }
 .tag-teal { background: var(--teal-bg); color: var(--teal); border-color: rgba(45,212,191,0.3); }
- 
+
 /* Headings */
 .doc-h1 {
   font-size: 28px;
@@ -674,7 +422,7 @@ body {
   border-bottom: 1px solid var(--border);
   color: var(--text);
 }
- 
+
 .doc-h2 {
   font-size: 16px;
   font-weight: 700;
@@ -686,7 +434,7 @@ body {
   border-left: 3px solid var(--red);
   border-radius: 0 8px 8px 0;
 }
- 
+
 .doc-h3 {
   font-size: 14px;
   font-weight: 700;
@@ -695,7 +443,7 @@ body {
   padding-left: 8px;
   border-left: 2px solid var(--blue);
 }
- 
+
 /* Paragraphs */
 .doc-p {
   font-size: 14px;
@@ -703,7 +451,7 @@ body {
   color: #b8c8db;
   margin-bottom: 12px;
 }
- 
+
 /* Code blocks */
 .code-card {
   background: #0a0e13;
@@ -712,7 +460,7 @@ body {
   overflow: hidden;
   margin: 14px 0;
 }
- 
+
 .code-header {
   background: var(--bg3);
   border-bottom: 1px solid var(--border);
@@ -721,7 +469,7 @@ body {
   align-items: center;
   gap: 8px;
 }
- 
+
 .code-dots { display: flex; gap: 5px; }
 .code-dot {
   width: 10px; height: 10px;
@@ -730,7 +478,7 @@ body {
 .dot-r { background: #ff5f57; }
 .dot-y { background: #ffbd2e; }
 .dot-g { background: #28c840; }
- 
+
 .code-lang {
   font-family: var(--font-mono);
   font-size: 11px;
@@ -740,7 +488,7 @@ body {
   text-transform: uppercase;
   letter-spacing: 0.1em;
 }
- 
+
 .copy-btn {
   background: var(--bg4);
   border: 1px solid var(--border2);
@@ -754,7 +502,7 @@ body {
 }
 .copy-btn:hover { color: var(--text); border-color: var(--muted); }
 .copy-btn.ok { color: var(--green); border-color: var(--green); }
- 
+
 .code-body {
   padding: 16px;
   font-family: var(--font-mono);
@@ -765,7 +513,7 @@ body {
   word-break: break-all;
   overflow-x: auto;
 }
- 
+
 /* Inline code */
 code.ic {
   background: var(--bg3);
@@ -776,7 +524,7 @@ code.ic {
   font-size: 12px;
   border: 1px solid var(--border2);
 }
- 
+
 /* Callout boxes */
 .callout {
   border-radius: 8px;
@@ -791,21 +539,21 @@ code.ic {
 .callout-icon { font-size: 18px; flex-shrink: 0; margin-top: 1px; }
 .callout-body {}
 .callout-title { font-weight: 700; margin-bottom: 3px; font-size: 12px; letter-spacing: 0.04em; text-transform: uppercase; }
- 
+
 .callout-tip { background: rgba(34,197,94,0.08); border-color: rgba(34,197,94,0.25); color: #86efac; }
 .callout-warn { background: rgba(251,191,36,0.08); border-color: rgba(251,191,36,0.25); color: #fde68a; }
 .callout-info { background: rgba(96,165,250,0.08); border-color: rgba(96,165,250,0.25); color: #93c5fd; }
 .callout-danger { background: rgba(239,68,68,0.08); border-color: rgba(239,68,68,0.25); color: #fca5a5; }
- 
+
 /* Tables */
 .doc-table-wrap { overflow-x: auto; margin: 14px 0; }
- 
+
 .doc-table {
   width: 100%;
   border-collapse: collapse;
   font-size: 13px;
 }
- 
+
 .doc-table th {
   background: var(--bg3);
   color: var(--muted);
@@ -818,7 +566,7 @@ code.ic {
   border-bottom: 1px solid var(--border2);
   white-space: nowrap;
 }
- 
+
 .doc-table td {
   padding: 9px 14px;
   border-bottom: 1px solid var(--border);
@@ -826,17 +574,17 @@ code.ic {
   vertical-align: top;
   line-height: 1.6;
 }
- 
+
 .doc-table tr:last-child td { border-bottom: none; }
 .doc-table tr:hover td { background: var(--bg2); }
- 
+
 /* Lists */
 .doc-list {
   list-style: none;
   padding: 0;
   margin: 8px 0 16px;
 }
- 
+
 .doc-list li {
   padding: 7px 0 7px 20px;
   font-size: 14px;
@@ -845,7 +593,7 @@ code.ic {
   line-height: 1.7;
   position: relative;
 }
- 
+
 .doc-list li:last-child { border-bottom: none; }
 .doc-list li::before {
   content: '▸';
@@ -855,7 +603,7 @@ code.ic {
   font-size: 11px;
   top: 9px;
 }
- 
+
 /* Ordered list */
 .doc-olist {
   list-style: none;
@@ -889,7 +637,7 @@ code.ic {
   justify-content: center;
   top: 9px;
 }
- 
+
 /* Complete banner */
 .complete-banner {
   background: linear-gradient(135deg, rgba(34,197,94,0.08), rgba(34,197,94,0.04));
@@ -901,7 +649,7 @@ code.ic {
   gap: 16px;
   margin-top: 40px;
 }
- 
+
 .complete-icon {
   width: 40px; height: 40px;
   background: rgba(34,197,94,0.15);
@@ -912,17 +660,17 @@ code.ic {
   font-size: 20px;
   flex-shrink: 0;
 }
- 
+
 .complete-text h3 { font-size: 14px; font-weight: 700; color: var(--green); margin-bottom: 2px; }
 .complete-text p { font-size: 12px; color: rgba(34,197,94,0.6); }
- 
+
 /* Horizontal rule */
 .doc-hr {
   border: none;
   border-top: 1px solid var(--border);
   margin: 20px 0;
 }
- 
+
 /* ══════════════════════════════════════
    MOBILE
 ══════════════════════════════════════ */
@@ -933,9 +681,9 @@ code.ic {
   background: rgba(0,0,0,0.75);
   z-index: 99;
 }
- 
+
 #overlay.on { display: block; }
- 
+
 @media (max-width: 768px) {
   #sidebar {
     position: fixed;
@@ -954,9 +702,9 @@ code.ic {
 </style>
 </head>
 <body>
- 
+
 <div id="overlay"></div>
- 
+
 <aside id="sidebar">
   <div class="sidebar-brand">
     <div class="brand-row">
@@ -979,7 +727,7 @@ code.ic {
     </div>
   </div>
 </aside>
- 
+
 <main id="main">
   <header id="topbar">
     <button id="menu-toggle">☰ Menú</button>
@@ -991,7 +739,7 @@ code.ic {
     <div id="content"></div>
   </div>
 </main>
- 
+
 <script>
 const MODULES = [
   {name:"API REST Notes",path:"THM-101/API REST notes.md",icon:"🔌",tags:["web","api"],color:"blue"},
@@ -1029,31 +777,31 @@ const MODULES = [
   {name:"John the Ripper",path:"THM-101/john the Ripper.md",icon:"🔨",tags:["passwords","cracking"],color:"red"},
   {name:"Netcat vs Nmap",path:"THM-101/netcat_vs_nmap.md",icon:"🔀",tags:["network","tools"],color:"teal"}
 ];
- 
+
 // ── State ──────────────────────────────────────────
 let visited = new Set(JSON.parse(localStorage.getItem('thm_visited') || '[]'));
 let currentMod = null;
- 
+
 // ── Progress ───────────────────────────────────────
 function updateProgress() {
   const pct = Math.round((visited.size / MODULES.length) * 100);
   document.getElementById('prog-fill').style.width = pct + '%';
   document.getElementById('prog-num').textContent = `${visited.size} / ${MODULES.length}`;
 }
- 
+
 function markVisited(path) {
   visited.add(path);
   localStorage.setItem('thm_visited', JSON.stringify([...visited]));
   updateProgress();
 }
- 
+
 // ── Menu ───────────────────────────────────────────
 function renderMenu(filter = '') {
   const menu = document.getElementById('menu');
   menu.innerHTML = '';
   const f = filter.toLowerCase();
   const filtered = MODULES.filter(m => m.name.toLowerCase().includes(f) || m.tags.some(t => t.includes(f)));
- 
+
   filtered.forEach(mod => {
     const done = visited.has(mod.path);
     const btn = document.createElement('button');
@@ -1065,37 +813,37 @@ function renderMenu(filter = '') {
     };
     menu.appendChild(btn);
   });
- 
+
   if (!filtered.length) {
     menu.innerHTML = '<div style="padding:20px;text-align:center;color:var(--muted2);font-size:13px">Sin resultados</div>';
   }
 }
- 
+
 // ── Sidebar mobile ─────────────────────────────────
 const sidebar = document.getElementById('sidebar');
 const overlay = document.getElementById('overlay');
- 
+
 function openSidebar() { sidebar.classList.add('open'); overlay.classList.add('on'); }
 function closeSidebar() { sidebar.classList.remove('open'); overlay.classList.remove('on'); }
- 
+
 document.getElementById('menu-toggle').onclick = openSidebar;
 overlay.onclick = closeSidebar;
 document.getElementById('search').addEventListener('input', e => renderMenu(e.target.value));
- 
+
 // ── Reading progress ────────────────────────────────
 document.getElementById('scroll-area').addEventListener('scroll', function () {
   const s = this.scrollTop, h = this.scrollHeight - this.clientHeight;
   document.getElementById('read-bar').style.width = (h > 0 ? Math.round(s / h * 100) : 0) + '%';
 });
- 
+
 // ════════════════════════════════════════════════════
 //  SMART MARKDOWN RENDERER
 // ════════════════════════════════════════════════════
- 
+
 function escHtml(s) {
   return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 }
- 
+
 function inlineFormat(s) {
   return s
     .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
@@ -1103,7 +851,7 @@ function inlineFormat(s) {
     .replace(/`(.+?)`/g, '<code class="ic">$1</code>')
     .replace(/\[(.+?)\]\((.+?)\)/g, '<a href="$2" target="_blank" rel="noopener" style="color:var(--blue);text-decoration:underline;text-underline-offset:3px">$1</a>');
 }
- 
+
 function detectCalloutType(line) {
   const l = line.toLowerCase();
   if (/tip|💡/.test(l)) return 'tip';
@@ -1111,14 +859,14 @@ function detectCalloutType(line) {
   if (/danger|❗|important|crítico/.test(l)) return 'danger';
   return 'info';
 }
- 
+
 function renderCallout(lines, type) {
   const icons = { tip: '💡', warn: '⚠️', info: 'ℹ️', danger: '❗' };
   const titles = { tip: 'Tip', warn: 'Atención', info: 'Nota', danger: 'Peligro' };
   const body = lines.map(l => inlineFormat(l.replace(/^>\s*/, '').replace(/\*\*/g, ''))).join('<br>');
   return `<div class="callout callout-${type}"><div class="callout-icon">${icons[type]}</div><div class="callout-body"><div class="callout-title">${titles[type]}</div>${body}</div></div>`;
 }
- 
+
 function renderCode(code, lang) {
   const id = 'c' + Math.random().toString(36).slice(2, 8);
   const label = lang || 'code';
@@ -1131,7 +879,7 @@ function renderCode(code, lang) {
     <div class="code-body" id="${id}">${escHtml(code)}</div>
   </div>`;
 }
- 
+
 function renderTable(headerLine, rows) {
   const ths = headerLine.split('|').filter(c => c.trim()).map(h => `<th>${inlineFormat(h.trim())}</th>`).join('');
   const trs = rows.map(r => {
@@ -1140,15 +888,15 @@ function renderTable(headerLine, rows) {
   }).join('');
   return `<div class="doc-table-wrap"><table class="doc-table"><thead><tr>${ths}</tr></thead><tbody>${trs}</tbody></table></div>`;
 }
- 
+
 function smartRender(raw) {
   const lines = raw.split('\n');
   let html = '';
   let i = 0;
- 
+
   while (i < lines.length) {
     const line = lines[i];
- 
+
     // ── Fenced code block ──
     if (line.trimStart().startsWith('```')) {
       const lang = line.replace(/^`+/, '').trim();
@@ -1161,7 +909,7 @@ function smartRender(raw) {
       html += renderCode(code.trimEnd(), lang);
       i++; continue;
     }
- 
+
     // ── Tables ──
     if (line.includes('|') && i + 1 < lines.length && /^\|?\s*[-:]+[-| :]*$/.test(lines[i + 1])) {
       const rowLines = [];
@@ -1173,31 +921,31 @@ function smartRender(raw) {
       html += renderTable(line, rowLines);
       continue;
     }
- 
+
     // ── H1 ──
     if (/^# /.test(line)) {
       html += `<h1 class="doc-h1">${line.slice(2)}</h1>`;
       i++; continue;
     }
- 
+
     // ── H2 ──
     if (/^## /.test(line)) {
       html += `<h2 class="doc-h2">${line.slice(3)}</h2>`;
       i++; continue;
     }
- 
+
     // ── H3 / H4 ──
     if (/^#{3,} /.test(line)) {
       html += `<h3 class="doc-h3">${line.replace(/^#+\s/, '')}</h3>`;
       i++; continue;
     }
- 
+
     // ── HR ──
     if (/^[-*]{3,}$/.test(line.trim())) {
       html += '<hr class="doc-hr">';
       i++; continue;
     }
- 
+
     // ── Blockquote / callout ──
     if (line.startsWith('>')) {
       const type = detectCalloutType(line);
@@ -1209,7 +957,7 @@ function smartRender(raw) {
       html += renderCallout(block, type);
       continue;
     }
- 
+
     // ── Unordered list ──
     if (/^[\s]*[-*+] /.test(line)) {
       const items = [];
@@ -1220,7 +968,7 @@ function smartRender(raw) {
       html += `<ul class="doc-list">${items.map(it => `<li>${it}</li>`).join('')}</ul>`;
       continue;
     }
- 
+
     // ── Ordered list ──
     if (/^\d+\. /.test(line)) {
       const items = [];
@@ -1231,18 +979,18 @@ function smartRender(raw) {
       html += `<ol class="doc-olist">${items.map(it => `<li>${it}</li>`).join('')}</ol>`;
       continue;
     }
- 
+
     // ── Blank line ──
     if (!line.trim()) { i++; continue; }
- 
+
     // ── Paragraph ──
     html += `<p class="doc-p">${inlineFormat(line)}</p>`;
     i++;
   }
- 
+
   return html;
 }
- 
+
 // ── Copy handler ───────────────────────────────────
 function doCopy(id, btn) {
   const el = document.getElementById(id);
@@ -1252,13 +1000,13 @@ function doCopy(id, btn) {
     setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('ok'); }, 2000);
   });
 }
- 
+
 // ── Tags ────────────────────────────────────────────
 const TAG_COLORS = ['blue','green','purple','yellow','teal','red'];
 function renderTags(tags) {
   return `<div class="tag-row">${tags.map((t, i) => `<span class="tag tag-${TAG_COLORS[i % TAG_COLORS.length]}">${t}</span>`).join('')}</div>`;
 }
- 
+
 // ── Load module ─────────────────────────────────────
 async function loadModule(mod) {
   currentMod = mod;
@@ -1268,13 +1016,13 @@ async function loadModule(mod) {
   document.getElementById('read-bar').style.width = '0%';
   document.getElementById('scroll-area').scrollTo(0, 0);
   renderMenu(document.getElementById('search').value);
- 
+
   try {
     const res = await fetch(mod.path);
     if (!res.ok) throw new Error('not found');
     const text = await res.text();
     const rendered = smartRender(text);
- 
+
     document.getElementById('content').innerHTML =
       renderTags(mod.tags) +
       rendered +
@@ -1285,7 +1033,7 @@ async function loadModule(mod) {
           <p>Marcado como revisado. Sigue con el siguiente módulo.</p>
         </div>
       </div>`;
- 
+
     markVisited(mod.path);
     renderMenu(document.getElementById('search').value);
   } catch {
@@ -1296,13 +1044,13 @@ async function loadModule(mod) {
       </div>`;
   }
 }
- 
+
 // ── Welcome screen ──────────────────────────────────
 function showWelcome() {
   const done = [...visited].length;
   const total = MODULES.length;
   const pct = Math.round(done / total * 100);
- 
+
   const grid = MODULES.map(m => {
     const isDone = visited.has(m.path);
     return `<div class="module-card${isDone ? ' done' : ''}" onclick="loadModuleByPath('${m.path}')">
@@ -1311,7 +1059,7 @@ function showWelcome() {
       ${isDone ? '<div class="module-card-done">✓ Revisado</div>' : ''}
     </div>`;
   }).join('');
- 
+
   document.getElementById('content').innerHTML = `
     <div class="welcome-hero">
       <h1>THM <span>Study</span> Dashboard</h1>
@@ -1324,12 +1072,12 @@ function showWelcome() {
     </div>
     <div class="modules-grid">${grid}</div>`;
 }
- 
+
 function loadModuleByPath(path) {
   const mod = MODULES.find(m => m.path === path);
   if (mod) loadModule(mod);
 }
- 
+
 // ── Init ────────────────────────────────────────────
 updateProgress();
 renderMenu();
@@ -1337,6 +1085,3 @@ showWelcome();
 </script>
 </body>
 </html>
- 
-
-
