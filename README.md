@@ -1,2 +1,17 @@
-# thm-notes
-This repository contains my  THM 101 study Summaries and an interactive dashboard to review them.
+# 🛡️ TryHackMe Learning Path: Cyber Security 101
+
+This repository serves as my personal documentation hub for my cybersecurity progress. Here, I organize and visualize detailed summaries of the modules I have completed on **TryHackMe**.
+
+### 🚀 [ACCESS THE INTERACTIVE DASHBOARD](TU_URL_AQUI)
+*(Replace TU_URL_AQUI with your GitHub Pages link)*
+
+## 📂 Project Content
+- **Custom Dashboard:** Developed with HTML/JS for an optimized reading experience of technical notes.
+- **Study Modules:** In-depth summaries covering Networking, Web Hacking, Forensics, and more.
+- **Hands-on Focus:** Ready-to-use commands for lab environments and methodological notes.
+
+## 🛠️ Documented Tools
+Nmap, Metasploit, Burp Suite, SQLMap, Wireshark, and more.
+
+---
+*"Cyber Security 101" Certificate completed in May 2026.*
