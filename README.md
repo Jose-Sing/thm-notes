@@ -3,7 +3,7 @@
 This repository serves as my personal documentation hub for my cybersecurity progress. Here, I organize and visualize detailed summaries of the modules I have completed on **TryHackMe**.
 
 ### 🚀 [ACCESS THE INTERACTIVE DASHBOARD](TU_URL_AQUI)
-*(Replace TU_URL_AQUI with your GitHub Pages link)*
+[*(Click here to see the dashboard)*](https://jose-sing.github.io/thm-notes/)
 
 ## 📂 Project Content
 - **Custom Dashboard:** Developed with HTML/JS for an optimized reading experience of technical notes.
