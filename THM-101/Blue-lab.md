@@ -1,14 +1,3 @@
-```bash
-nmap -sV -sC --script vuln -oN blue.nmap [ip target]
-
-o
-
-
-nmap -sV -vv --script vuln [ip target]
-```
-
-
-
 # Modulo blue Eternal
 
 
