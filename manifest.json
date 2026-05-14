@@ -1,0 +1,16 @@
+{
+  "name": "THM Study Dashboard",
+  "short_name": "THM Notes",
+  "description": "Mis resúmenes interactivos de TryHackMe",
+  "start_url": "index.html",
+  "display": "standalone",
+  "background_color": "#0d1117",
+  "theme_color": "#ef4444",
+  "icons": [
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/2092/2092663.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
