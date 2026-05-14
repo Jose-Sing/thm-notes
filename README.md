@@ -1,2 +1,2 @@
 # thm-notes
-This repository contains my  THM 101 Summaries and an interactive dashboard to review them.
+This repository contains my  THM 101 study Summaries and an interactive dashboard to review them.
